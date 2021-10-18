@@ -215,9 +215,9 @@ function checkMoveBlackRook(from, to) {
 		return false;
 	} else if (to < 0 || to > board.length) {
 		return false;
-	} else if (to % 8 === from % 8 && checkForBlackPiece(to)) {
+	} else if (to % 8 === from % 8 && checkForBlackPiece(to) && checkForPiecesOnRow(from, to)) {
 		return true;
-	} else if (Math.floor(from/8) === Math.floor(to/8) && checkForBlackPiece(to)) {
+	} else if (Math.floor(from/8) === Math.floor(to/8) && checkForBlackPiece(to) && checkForPiecesOnRow(from, to)) {
 		return true;
 	}
 }
@@ -299,8 +299,10 @@ function checkForPiecesOnDiagonal(from, to) {
 //Check for pieces on the row or column
 function checkForPiecesOnRow(from, to) {
 	if (Math.floor(from/8) === Math.floor(to/8)) {
+		console.log("a")
 		if (from < to) {
 			for (let i = from+1; i < to; i++) {
+				console.log(!checkForPiece(i))
 				if (!checkForPiece(i)) {
 					return false;
 				}
@@ -308,7 +310,7 @@ function checkForPiecesOnRow(from, to) {
 			return true;
 		} else {
 			for (let i = to+1; i < from; i++) {
-				console.log(i)
+				console.log(!checkForPiece(i))
 				if (!checkForPiece(i)) {
 					return false;
 				} 
@@ -316,8 +318,10 @@ function checkForPiecesOnRow(from, to) {
 			return true;
 		}
 	} else {
+		console.log("b")
 		if (from < to) {
 			for (let i = from+8; i < to; i+=8) {
+				console.log(!checkForPiece(i))
 				if (!checkForPiece(i)) {
 					return false;
 				}
@@ -325,6 +329,7 @@ function checkForPiecesOnRow(from, to) {
 			return true;
 		} else {
 			for (let i = to+8; i < from; i+= 8) {
+				console.log(!checkForPiece(i))
 				if (!checkForPiece(i)) {
 					return false;
 				}
