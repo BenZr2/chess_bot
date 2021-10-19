@@ -104,6 +104,8 @@ function checkMovePossible(piece, from, to) {
 			return checkMoveBlackQueen(from, to);
 		case "1p":
 			return checkMoveBlackPawn(from, to);
+		default:
+			return false;
 	}
 }
 //End
@@ -123,10 +125,45 @@ function checkMoveWhitePawn(from, to) {
 		return true;
 	} else if (from - 16 === to && from > 47 && board[to] === "x" && board[to+8] === "x") {
 		return true;
-	} else {
+	} 
+	return false;
+}
+
+function checkMoveWhiteKnight(from, to) {
+	let move = Math.abs(from-to)
+	if (from < 0 || from > board.length) {
+		return false;
+	} else if (to < 0 || to > board.length) {
+		return false;
+	} else if (!checkForWhitePiece(to)) {
+		return false;
+	} else if (move > 17) {
 		return false;
 	}
+	if (move === 15) {
+		return true;
+	} else if (move === 6) {
+		return true;
+	} else if (move === 10) {
+		return true;
+	} else if (move === 17) {
+		return true;
+	}
+	return false;
 }
+
+//		left19			right21
+//	left26					right30
+//				mid 36
+//	left42					right 46
+//		left51			right53
+
+
+//			17			 15
+//		10					6
+//				mid 36
+//	   -6				   -10
+//		 -15			 -17
 
 function checkMoveWhiteRook(from, to) {
 	if (from < 0 || from > board.length) {
@@ -138,6 +175,7 @@ function checkMoveWhiteRook(from, to) {
 	} else if (Math.floor(from/8) === Math.floor(to/8) && checkForWhitePiece(to) && checkForPiecesOnRow(from, to)) {
 		return true;
 	}
+	return false
 }
 
 function checkMoveWhiteBishop(from, to) {
@@ -145,37 +183,18 @@ function checkMoveWhiteBishop(from, to) {
 		return false;
 	} else if (to < 0 || to > board.length) {
 		return false;
-	} else if (to % 8 === from % 8) {
+	}
+	if (!checkForWhitePiece(to)) {
 		return false;
-	} else if (Math.floor(from/8) === Math.floor(to/8)) {
+	} else if (document.getElementById(""+from).className.split(" ")[1] !== document.getElementById(""+to).className.split(" ")[1]) {
 		return false;
+	}
+	else if ((from-to)%7 === 0) {
+		return checkForPiecesOnRightDiagonal(from, to);
+	} else if ((from-to)%9 === 0) {
+		return checkForPiecesOnLeftDiagonal(from, to);
 	} 
-	
-	
-	else if ((from - to) % 7 === 0) {
-		console.log("a")
-		for (let i = from-7; i > to; i-=7) {
-			if (!checkForPiece(i)) {
-				console.log("a1")
-				return false;
-			}
-		}
-	} else if ((from -to) % 9 === 0) {
-		console.log("b")
-		for (let i = from-9; i > to; i-=9) {
-			if (!checkForPiece(i)) {
-				console.log("b1")
-				return false;
-			}
-		}
-	}
-	
-
-	else if (!checkForWhitePiece(to)) {
-		return false;
-	} else {
-		return true;
-	}
+	return false;
 }
 
 
@@ -188,9 +207,28 @@ function checkMoveWhiteKing(from, to) {
 		return true;
 	} else if ((from+7 === to || from+8 === to || from+9 === to || from +1 === to) && checkForWhitePiece(to)) {
 		return true;
-	} else {
+	} 
+	return false;
+}
+
+function checkMoveWhiteQueen(from, to) {
+	if (from < 0 || from > board.length) {
+		return false;
+	} else if (to < 0 || to > board.length) {
 		return false;
 	}
+	if (!checkForWhitePiece(to)) {
+		return false;
+	} else if ((from-to)%7 === 0) {
+		return checkForPiecesOnRightDiagonal(from, to);
+	} else if ((from-to)%9 === 0) {
+		return checkForPiecesOnLeftDiagonal(from, to);
+	} else if (to % 8 === from % 8 && checkForWhitePiece(to) && checkForPiecesOnRow(from, to)) {
+		return true;
+	} else if (Math.floor(from/8) === Math.floor(to/8) && checkForWhitePiece(to) && checkForPiecesOnRow(from, to)) {
+		return true;
+	}
+	return false;
 }
 
 //Black
@@ -205,9 +243,31 @@ function checkMoveBlackPawn(from, to) {
 		return true;
 	} else if (from + 16 === to && from < 16 && checkForPiece(to) && board[to-8] === "x") {
 		return true;
-	} else {
+	} 
+	return false;
+}
+
+function checkMoveBlackKnight(from, to) {
+	let move = Math.abs(from-to)
+	if (from < 0 || from > board.length) {
+		return false;
+	} else if (to < 0 || to > board.length) {
+		return false;
+	} else if (!checkForBlackPiece(to)) {
+		return false;
+	} else if (move > 17) {
 		return false;
 	}
+	if (move === 15) {
+		return true;
+	} else if (move === 6) {
+		return true;
+	} else if (move === 10) {
+		return true;
+	} else if (move === 17) {
+		return true;
+	}
+	return false;
 }
 
 function checkMoveBlackRook(from, to) {
@@ -220,6 +280,7 @@ function checkMoveBlackRook(from, to) {
 	} else if (Math.floor(from/8) === Math.floor(to/8) && checkForBlackPiece(to) && checkForPiecesOnRow(from, to)) {
 		return true;
 	}
+	return false;
 }
 
 function checkMoveBlackBishop(from, to) {
@@ -227,31 +288,18 @@ function checkMoveBlackBishop(from, to) {
 		return false;
 	} else if (to < 0 || to > board.length) {
 		return false;
-	} else if (to % 8 === from % 8) {
-		return false;
-	} else if (Math.floor(from/8) === Math.floor(to/8)) {
-		return false;
-	}  else if ((to - from) % 7 === 0) {
-		console.log("a")
-		for (let i = from+7; i < to; i+=7) {
-			if (!checkForPiece(i)) {
-				console.log("a1")
-				return true;
-			}
-		}
-	} else if ((to - from) % 9 === 0) {
-		console.log("b")
-		for (let i = from+9; i < to; i+=9) {
-			if (!checkForPiece(i)) {
-				console.log("b1")
-				return false;
-			}
-		}
-	}  else if (!checkForBlackPiece(to)) {
-		return false;
-	} else {
-		return true;
 	}
+	if (!checkForBlackPiece(to)) {
+		return false;
+	} else if (document.getElementById(""+from).className.split(" ")[1] !== document.getElementById(""+to).className.split(" ")[1]) {
+		return false;
+	}
+	else if ((from-to)%7 === 0) {
+		return checkForPiecesOnRightDiagonal(from, to);
+	} else if ((from-to)%9 === 0) {
+		return checkForPiecesOnLeftDiagonal(from, to);
+	} 	
+	return false;
 }
 
 function checkMoveBlackKing(from, to) {
@@ -263,9 +311,29 @@ function checkMoveBlackKing(from, to) {
 		return true;
 	} else if ((from+7 === to || from+8 === to || from+9 === to || from +1 === to) && checkForBlackPiece(to)) {
 		return true;
-	} else {
+	} 
+	return false;
+}
+
+function checkMoveBlackQueen(from, to) {
+	if (from < 0 || from > board.length) {
+		return false;
+	} else if (to < 0 || to > board.length) {
 		return false;
 	}
+	console.log("begin")
+	if (!checkForBlackPiece(to)) {
+		return false;
+	} else if ((from-to)%7 === 0) {
+		return checkForPiecesOnRightDiagonal(from, to);
+	} else if ((from-to)%9 === 0) {
+		return checkForPiecesOnLeftDiagonal(from, to);
+	} else if (to % 8 === from % 8 && checkForBlackPiece(to) && checkForPiecesOnRow(from, to)) {
+		return true;
+	} else if (Math.floor(from/8) === Math.floor(to/8) && checkForBlackPiece(to) && checkForPiecesOnRow(from, to)) {
+		return true;
+	}
+	return false;
 }
 
 //Check if there is a piece at position
@@ -292,14 +360,47 @@ function checkForBlackPiece(to) {
 		return true;
 	}
 }
-//Check for pieces on the diagonal
-function checkForPiecesOnDiagonal(from, to) {
-
+//Check for pieces on the right diagonal
+function checkForPiecesOnRightDiagonal(from, to) {
+	if (from-to > 0) {
+		for (let i = from-7; i > to; i-=7) {
+			if (!checkForPiece(i)) {
+				return false;
+			}
+		}
+		return true;
+	} else if (from-to < 0) {
+		for (let i = from+7; i < to; i+=7) {
+			if (!checkForPiece(i)) {
+				return false;
+			}
+		}
+		return true;
+	}
 }
+
+//Check for pieces on the left diagonal
+function checkForPiecesOnLeftDiagonal(from, to) {
+	if (from-to > 0) {
+		for (let i = from-9; i > to; i-=9) {
+			if (!checkForPiece(i)) {
+				return false;
+			}
+		}
+		return true;
+	} else if (from-to < 0) {
+		for (let i = from+9; i < to; i+=9) {
+			if (!checkForPiece(i)) {
+				return false;
+			}
+		}
+		return true;
+	}
+}
+
 //Check for pieces on the row or column
 function checkForPiecesOnRow(from, to) {
 	if (Math.floor(from/8) === Math.floor(to/8)) {
-		console.log("a")
 		if (from < to) {
 			for (let i = from+1; i < to; i++) {
 				console.log(!checkForPiece(i))
@@ -318,7 +419,6 @@ function checkForPiecesOnRow(from, to) {
 			return true;
 		}
 	} else {
-		console.log("b")
 		if (from < to) {
 			for (let i = from+8; i < to; i+=8) {
 				console.log(!checkForPiece(i))
@@ -359,10 +459,17 @@ function dragOverSquare(event) {
 }
 
 function dragDropSquare() {
+	if (piece_selected[0] === "0" && movesPlayed["0"] > movesPlayed["1"]) {
+		return false;
+	} else if (piece_selected[0] === "1" && movesPlayed["0"] === movesPlayed["1"]) {
+		return false;
+	}
+	
 	if ( checkMovePossible(piece_selected, piece_selected_square, parseInt(this.id)) ) {
 		board[piece_selected_square] = "x";
 		board[parseInt(this.id)] = piece_selected;
 		updatePieces();
+		movesPlayed[piece_selected[0]] += 1;
 	} else {
 		//console.log(piece_selected, piece_selected_square, parseInt(this.id));
 		console.log( "invalid move", checkMovePossible(piece_selected, piece_selected_square, parseInt(this.id)))
@@ -403,26 +510,24 @@ addNumberToBoard();
 
 
 
-
-
 // Game Start //
-
+const movesPlayed = {"0":0,
+					 "1":0}
 updatePieces();
 
-//console.log(piece_selected);
+
 
 /*
 Bug list:
-	-queen, bishop, knight can do illegal moves
-	-queen, bishop, rook can jump over pieces
+	-queen can do illegal moves on diagonal
 	-class of white and black squares cant be found
 
 
 To do's:
 	-Style the chess board
 	-Dragging animation and sound
-	-Desing moving pattern: Done = King, Pawn, Rook
-							Not done = Queen, bishop, knight
+	-Desing moving pattern: Done = King, Pawn, Rook, bishop, knight
+							Not done = Queen,
 */
 
 
