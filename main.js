@@ -321,7 +321,6 @@ function checkMoveBlackQueen(from, to) {
 	} else if (to < 0 || to > board.length) {
 		return false;
 	}
-	console.log("begin")
 	if (!checkForBlackPiece(to)) {
 		return false;
 	} else if ((from-to)%7 === 0) {
@@ -464,7 +463,7 @@ function dragDropSquare() {
 	} else if (piece_selected[0] === "1" && movesPlayed["0"] === movesPlayed["1"]) {
 		return false;
 	}
-	
+
 	if ( checkMovePossible(piece_selected, piece_selected_square, parseInt(this.id)) ) {
 		board[piece_selected_square] = "x";
 		board[parseInt(this.id)] = piece_selected;
@@ -524,10 +523,16 @@ Bug list:
 
 
 To do's:
+	-checking
+	-castling
+	-checkmate -> winner
+
 	-Style the chess board
 	-Dragging animation and sound
 	-Desing moving pattern: Done = King, Pawn, Rook, bishop, knight
 							Not done = Queen,
+
+
 */
 
 
