@@ -62,6 +62,16 @@ function getPiece(from) {
 	return board[convertToIndex(from)];
 }
 
+//enter piece to find on which square it is standing
+function findPiece(piece) {
+	for (let i = 0; i < 64; i++) {
+		if (board[i] === piece) {
+			return i;
+		} 
+	}
+	return false
+}
+
 // converts the square to array index: a1 -> index [56]
 function convertToIndex(square) {
 	const letter = ["a", "b", "c", "d", "e", "f", "g", "h"];
@@ -207,7 +217,9 @@ function checkMoveWhiteKing(from, to) {
 		return true;
 	} else if ((from+7 === to || from+8 === to || from+9 === to || from +1 === to) && checkForWhitePiece(to)) {
 		return true;
-	} 
+	} else if (from === 60 && to === 62 && board[63] === '0r') {
+		return true;
+	}
 	return false;
 }
 
@@ -402,7 +414,6 @@ function checkForPiecesOnRow(from, to) {
 	if (Math.floor(from/8) === Math.floor(to/8)) {
 		if (from < to) {
 			for (let i = from+1; i < to; i++) {
-				console.log(!checkForPiece(i))
 				if (!checkForPiece(i)) {
 					return false;
 				}
@@ -410,7 +421,6 @@ function checkForPiecesOnRow(from, to) {
 			return true;
 		} else {
 			for (let i = to+1; i < from; i++) {
-				console.log(!checkForPiece(i))
 				if (!checkForPiece(i)) {
 					return false;
 				} 
@@ -420,7 +430,6 @@ function checkForPiecesOnRow(from, to) {
 	} else {
 		if (from < to) {
 			for (let i = from+8; i < to; i+=8) {
-				console.log(!checkForPiece(i))
 				if (!checkForPiece(i)) {
 					return false;
 				}
@@ -428,7 +437,6 @@ function checkForPiecesOnRow(from, to) {
 			return true;
 		} else {
 			for (let i = to+8; i < from; i+= 8) {
-				console.log(!checkForPiece(i))
 				if (!checkForPiece(i)) {
 					return false;
 				}
@@ -438,40 +446,114 @@ function checkForPiecesOnRow(from, to) {
 	}
 }
 
+//Castling
+function castling(piece, to) {
+
+}
+
+//return all possible moves of a piece
+function checkAllMovesFromAPiece(piece, from) {
+	let possibleMoves = [];
+
+	for (let i = 0; i < 64; i++) {
+		if (checkMovePossible(piece, from, i)) {
+			possibleMoves.push(i);
+		}
+	}
+	return possibleMoves;
+}
+
+//return if the king is being checked
+function kingCheck(color) {
+	let kingPosition = findPiece(color+'k')
+	for (let i = 0; i < 64; i++) {
+		if (board[i] !== 'x') {
+			if (checkMovePossible(board[i], i, kingPosition)) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+//return if the king is check mate
+function kingCheckMate(color) {
+	let kingPosition = findPiece(color+'k');
+
+	for (let i = 0; i < 64; i++) {
+		if (board[i] !== 'x') {
+			let possibleMovesArray = checkAllMovesFromAPiece(board[i], i);
+			if (possibleMovesArray.length) { //length of function???
+				for (let j = 0; j < possibleMovesArray.length; j++) {
+					if (checkMovePossible(board[i], i, kingPosition)) {
+						return true
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+
+
 //End
 
 // Start
 //Drag Functions
 let piece_selected;
 let piece_selected_square;
+let gameEnd = false;
 
+//fires if this piece gets picked up
 function dragStartPiece() {
 	piece_selected_square = parseInt(this.parentElement.id);
 	piece_selected = board[piece_selected_square];
 	this.style.opacity = "1";
-
-	//console.log(piece_selected, piece_selected_square)
 }
 
+//gets fired if the piece is over a square
 function dragOverSquare(event) {
 	event.preventDefault();
 }
 
+
+//fires if you let a piece drop on a square
 function dragDropSquare() {
-	if (piece_selected[0] === "0" && movesPlayed["0"] > movesPlayed["1"]) {
+	let color = piece_selected[0];
+
+	if (gameEnd) {
 		return false;
-	} else if (piece_selected[0] === "1" && movesPlayed["0"] === movesPlayed["1"]) {
+	}
+	if (color === "0" && movesPlayed["0"] > movesPlayed["1"]) {
+		return false;
+	} else if (color === "1" && movesPlayed["0"] === movesPlayed["1"]) {
 		return false;
 	}
 
-	if ( checkMovePossible(piece_selected, piece_selected_square, parseInt(this.id)) ) {
+	if ( checkMovePossible(piece_selected, piece_selected_square, parseInt(this.id))) {
 		board[piece_selected_square] = "x";
 		board[parseInt(this.id)] = piece_selected;
-		updatePieces();
-		movesPlayed[piece_selected[0]] += 1;
+
+		if (piece_selected[1] === "k") {
+			castling(piece_selected, parseInt(this.id))	// to do castling
+		}
+
+		if (kingCheck(color)) {
+			board[piece_selected_square] = piece_selected;
+			board[parseInt(this.id)] = 'x';
+		} else {
+			updatePieces();
+			movesPlayed[piece_selected[0]] += 1;
+		}
+
+		color ^= 1;
+		if (kingCheckMate(color)) {
+			movesPlayed['0'] += 10;
+			displayWinner(color);
+		}
 	} else {
-		//console.log(piece_selected, piece_selected_square, parseInt(this.id));
-		console.log( "invalid move", checkMovePossible(piece_selected, piece_selected_square, parseInt(this.id)))
+		console.log("invalid move", checkMovePossible(piece_selected, piece_selected_square, parseInt(this.id)))
 	}
 }
 //End
@@ -506,33 +588,38 @@ function addNumberToBoard() {
 addNumberToBoard();
 //End
 
+//Display Winner
+function displayWinner(color) {
+	color = parseInt(color) ? 'White' : 'Black';
+	document.getElementById("winner").innerHTML = color + " won";
+	document.getElementById("board").style.margin = "3em auto";
+	gameEnd = true;
+}
 
 
 
 // Game Start //
-const movesPlayed = {"0":0,
-					 "1":0}
+const movesPlayed = {"0":0, "1":0}
 updatePieces();
+
+
+
+
+//Testing area
+
 
 
 
 /*
 Bug list:
-	-queen can do illegal moves on diagonal
+	-queen and knight can do illegal moves on diagonal
 	-class of white and black squares cant be found
 
 
 To do's:
-	-checking
-	-castling
-	-checkmate -> winner
-
+	-castling line 539
 	-Style the chess board
 	-Dragging animation and sound
-	-Desing moving pattern: Done = King, Pawn, Rook, bishop, knight
-							Not done = Queen,
-
-
 */
 
 

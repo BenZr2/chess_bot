@@ -2,6 +2,11 @@ body {
   background-color: rgb(199, 218, 212);
 }
 
+#winner {
+  text-align: center;
+  font-size: 2em;
+}
+
 #board {
   border: 1.2em solid rgba(65, 8, 8, 0.801);
   border-radius: 0.5em;
