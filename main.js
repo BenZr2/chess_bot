@@ -1,3 +1,5 @@
+let audio_move = new Audio('./pieces/Move.mp3');
+
 //creates the board with square divs, img for piece, and eventlistener
 for (let i = 0; i < 64; i++) {
 	let square = document.createElement("div");
@@ -46,6 +48,7 @@ function updatePieces() {
 const board = ["1r","1n","1b","1q","1k","1b","1n","1r","1p","1p","1p","1p","1p","1p","1p","1p","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","x","0p","0p","0p","0p","0p","0p","0p","0p","0r","0n","0b","0q","0k","0b","0n","0r",];
 
 //move piece from to another square: a1 -> a2
+/* not using this function at the moment
 function makeMove(from, to) {
 	if (checkMovePossible(board[convertToIndex(from)], from, to)) {
 		const piece = getPiece(from);
@@ -56,6 +59,7 @@ function makeMove(from, to) {
 		return "invalid move";
 	}
 }
+*/
 
 //get the piece that is standing on the from square
 function getPiece(from) {
@@ -451,13 +455,25 @@ function castling(piece, to) {
 
 }
 
+// for testing moves
+function testMove(piece, from, to, restoreSquare='x') {
+	board[from] = restoreSquare;
+	board[to] = piece;
+}
+
 //return all possible moves of a piece
 function checkAllMovesFromAPiece(piece, from) {
 	let possibleMoves = [];
+	let restoreSquare;
 
 	for (let i = 0; i < 64; i++) {
 		if (checkMovePossible(piece, from, i)) {
-			possibleMoves.push(i);
+			restoreSquare = board[i];
+			testMove(piece, from, i);
+			if (!kingCheck(piece[0])) {
+				possibleMoves.push(i);
+			}
+			testMove(piece, i, from, restoreSquare);
 		}
 	}
 	return possibleMoves;
@@ -479,20 +495,26 @@ function kingCheck(color) {
 //return if the king is check mate
 function kingCheckMate(color) {
 	let kingPosition = findPiece(color+'k');
-
+	let possibleMovesArray;
+	let piece;
+	let restoreSquare;
+	
 	for (let i = 0; i < 64; i++) {
 		if (board[i] !== 'x') {
-			let possibleMovesArray = checkAllMovesFromAPiece(board[i], i);
-			if (possibleMovesArray.length) { //length of function???
-				for (let j = 0; j < possibleMovesArray.length; j++) {
-					if (checkMovePossible(board[i], i, kingPosition)) {
-						return true
-					}
+			possibleMovesArray = checkAllMovesFromAPiece(board[i], i);
+			piece = board[i]
+			for (let j = 0; j < possibleMovesArray.length; j++) {
+				restoreSquare = board[possibleMovesArray[j]];
+				testMove(piece, i, possibleMovesArray[j]);
+				if (!kingCheck(color)) {
+					testMove(piece, possibleMovesArray[j], i, restoreSquare);
+					return false;
 				}
+				testMove(piece, possibleMovesArray[j], i, restoreSquare);
 			}
 		}
 	}
-	return false;
+	return true;
 }
 
 
@@ -546,12 +568,14 @@ function dragDropSquare() {
 			updatePieces();
 			movesPlayed[piece_selected[0]] += 1;
 		}
-
+		
 		color ^= 1;
 		if (kingCheckMate(color)) {
 			movesPlayed['0'] += 10;
 			displayWinner(color);
 		}
+		
+		audio_move.play()
 	} else {
 		console.log("invalid move", checkMovePossible(piece_selected, piece_selected_square, parseInt(this.id)))
 	}
